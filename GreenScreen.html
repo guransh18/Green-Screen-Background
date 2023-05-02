@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Green screen Image</title>
+
+    <style>
+        h1 {
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            color: navy;
+            font-style: oblique;
+            border-style: dotted;
+            width: fit-content;
+            margin-right: auto;
+        }
+        
+        canvas {
+            height: 300px;
+            border: 1px solid black;
+        }
+    </style>
+
+    <script>
+        var fgimage = null;
+        var bgimage = null;
+
+
+
+        function loadForegroundImage() {
+            var fileinput = document.getElementById("fgfile");
+            fgimage = new SimpleImage(fileinput);
+            var fgcan = document.getElementById("can1");
+            fgimage.drawTo(fgcan);
+        }
+
+        function loadBackgroundImage() {
+            var fileinput = document.getElementById("bgfile");
+            bgimage = new SimpleImage(fileinput);
+            var bgcan = document.getElementById("can2");
+            bgimage.drawTo(bgcan);
+
+        }
+
+        function doGreenScreen() {
+            if (fgimage == null || !fgimage.complete()) {
+                alert("foreground not loaded");
+                return;
+            }
+            if (bgimage == null || !bgimage.complete()) {
+                alert("background not loaded");
+            }
+            var output = new SimpleImage(fgimage.getWidth(), fgimage.getHeight())
+
+            for (var pixel of fgimage.values()) {
+                var x = pixel.getX();
+                var y = pixel.getY();
+
+                var green = 230;
+
+                if (pixel.getGreen() >= green) {
+                    var bgpixel = bgimage.getPixel(x, y);
+                    output.setPixel(x, y, bgpixel);
+                } else {
+                    output.setPixel(x, y, pixel)
+                }
+
+            }
+
+
+            var fgcan = document.getElementById("can1");
+            var bgcan = document.getElementById("can2");
+
+            output.drawTo(fgcan);
+            doClear(bgcan);
+        }
+
+        function clearCanvas() {
+            var fgcan = document.getElementById("can1");
+            var bgcan = document.getElementById("can2");
+            doClear(fgcan);
+            doClear(bgcan);
+        }
+
+        function doClear(canvas) {
+            var context = canvas.getContext("2d");
+            context.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    </script>
+</head>
+
+<body style="background-color: rgb(186, 247, 254); font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;">
+    <script src="https://www.dukelearntoprogram.com/course1/common/js/image/SimpleImage.js"></script>
+    <h1>Upload and Apply Green screen Algorithm</h1>
+
+    <canvas id="can1">
+    </canvas>
+
+    <canvas id="can2">
+    </canvas>
+
+    <p>
+        Upload Foreground Image :
+        <input type="file" id="fgfile" accept="image/*" multiple="false" onchange="loadForegroundImage()"> <br><br> Upload Background Image :
+        <input type="file" id="bgfile" accept="image/*" multiple="false" onchange="loadBackgroundImage()"> <br><br>
+        <input type="button" value="Create Composite" id="create" onclick="doGreenScreen()">
+        <input type="button" value="Clear Canvases" id="clear" onclick="clearCanvas()">
+
+
+    </p>
+</body>
+
+</html>
